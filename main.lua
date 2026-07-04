@@ -1,6 +1,3 @@
--- ==========================================
--- НАСТРОЙКИ
--- ==========================================
 local musicFileName = "umad_sci.mp3"
 local musicUrl = "https://raw.githubusercontent.com/cawiworld/fekality/refs/heads/main/umad_sci.mp3"
 
@@ -8,10 +5,8 @@ local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
 local TweenService = game:GetService("TweenService")
 local CoreGui = game:GetService("CoreGui")
+local SoundService = game:GetService("SoundService")
 
--- ==========================================
--- КАСТОМНАЯ СИСТЕМА УВЕДОМЛЕНИЙ (UI)
--- ==========================================
 local HttpParent = CoreGui:FindFirstChild("RobloxGui") or CoreGui
 local NotificationGui = HttpParent:FindFirstChild("FekalityNotifications")
 
@@ -19,7 +14,10 @@ if not NotificationGui then
     NotificationGui = Instance.new("ScreenGui")
     NotificationGui.Name = "FekalityNotifications"
     NotificationGui.ResetOnSpawn = false
-    NotificationGui.Parent = HttpParent
+    local successUI = pcall(function() NotificationGui.Parent = HttpParent end)
+    if not successUI then
+        NotificationGui.Parent = LocalPlayer:WaitForChild("PlayerGui")
+    end
 end
 
 local Container = NotificationGui:FindFirstChild("Container")
@@ -58,10 +56,6 @@ local function LogMessage(title, text)
         Accent.BackgroundTransparency = 1
         Accent.Parent = NotificationFrame
         
-        local AccentCorner = Instance.new("UICorner")
-        AccentCorner.CornerRadius = UDim.new(0, 5)
-        AccentCorner.Parent = Accent
-
         local TitleLabel = Instance.new("TextLabel")
         TitleLabel.Size = UDim2.new(1, -20, 0, 22)
         TitleLabel.Position = UDim2.new(0, 14, 0, 4)
@@ -107,35 +101,32 @@ local function LogMessage(title, text)
     end)
 end
 
--- ==========================================
--- АВТО-СКАЧИВАНИЕ МУЗЫКИ
--- ==========================================
-if not isfile(musicFileName) then
+if type(isfile) == "function" and not isfile(musicFileName) then
     LogMessage("fekality crack", "downloading umad_sci.mp3...")
     local success, fileData = pcall(function()
         return game:HttpGet(musicUrl)
     end)
     
     if success and fileData and not fileData:find("404: Not Found") then
-        writefile(musicFileName, fileData)
-        LogMessage("fekality crack", "music downloaded!")
+        if type(writefile) == "function" then
+            writefile(musicFileName, fileData)
+            LogMessage("fekality crack", "music downloaded!")
+        end
     else
         LogMessage("error", "failed to download music!")
     end
 end
 
--- ==========================================
--- ЛОГИКА ПОБЕДЫ (СЦИ)
--- ==========================================
 local function PlaySCI()
     local success, asset = pcall(function()
-        if getsynasset then return getsynasset(musicFileName) end
-        return getcustomasset(musicFileName)
+        if type(getsynasset) == "function" then return getsynasset(musicFileName) end
+        if type(getcustomasset) == "function" then return getcustomasset(musicFileName) end
+        return nil
     end)
 
     if success and asset then
         local sound = Instance.new("Sound")
-        sound.Parent = CoreGui
+        sound.Parent = SoundService
         sound.SoundId = asset
         sound.Volume = 2
         sound:Play()
@@ -159,8 +150,8 @@ task.spawn(function()
                 if gameUI then
                     local cashOut = gameUI:FindFirstChild("CashOut")
                     if cashOut and cashOut.Visible then
-                        if not CoreGui:FindFirstChild("SCIMusicFlag") then
-                            local flag = Instance.new("BoolValue", CoreGui)
+                        if not SoundService:FindFirstChild("SCIMusicFlag") then
+                            local flag = Instance.new("BoolValue", SoundService)
                             flag.Name = "SCIMusicFlag"
                             game:GetService("Debris"):AddItem(flag, 12)
                             PlaySCI()
@@ -172,31 +163,30 @@ task.spawn(function()
     end
 end)
 
--- ==========================================
--- ХИТЛОГИ (БЕЗОПАСНЫЙ ХУК)
--- ==========================================
-local mt = getrawmetatable(game)
-local oldNamecall = mt.__namecall
-setreadonly(mt, false)
+local oldNamecall
 
-mt.__namecall = newcclosure(function(self, ...)
-    local method = getnamecallmethod()
+local function hookLogic(self, ...)
     local args = {...}
+    local method = ""
     
+    if type(getnamecallmethod) == "function" then
+        method = getnamecallmethod()
+    else
+        method = "FireServer"
+    end
+
     if method == "FireServer" and typeof(self) == "Instance" then
         if self.Name == "ShootGun" or self.Name == "Throw" or tostring(args[1]) == "Shoot" then
             
             if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") then
                 if LocalPlayer.Character.Humanoid.Health <= 0 then
                     LogMessage("fekality crack", "Missed due to death")
-                    -- БЕЗОПАСНЫЙ ВОЗВРАТ
-                    if oldNamecall then return oldNamecall(self, ...) end
+                    if type(oldNamecall) == "function" then return oldNamecall(self, ...) end
                     return
                 end
             end
             
             local targetArg = args[2] 
-            
             task.spawn(function()
                 task.wait(0.05)
                 if typeof(targetArg) == "Instance" and targetArg.Parent and targetArg.Parent:FindFirstChild("Humanoid") then
@@ -209,11 +199,31 @@ mt.__namecall = newcclosure(function(self, ...)
         end
     end
     
-    -- БЕЗОПАСНЫЙ ВОЗВРАТ (НЕТ ОШИБКИ LINE 162)
-    if oldNamecall then 
+    if type(oldNamecall) == "function" then 
         return oldNamecall(self, ...) 
     end
-end)
-setreadonly(mt, true)
+end
 
-LogMessage("fekality crack", "script loaded! author: relosterpc")
+local hookSuccess, hookError = pcall(function()
+    if type(hookmetamethod) == "function" then
+        oldNamecall = hookmetamethod(game, "__namecall", hookLogic)
+    else
+        local mt = getrawmetatable(game)
+        oldNamecall = mt.__namecall
+        if type(setreadonly) == "function" then setreadonly(mt, false) end
+        
+        if type(newcclosure) == "function" then
+            mt.__namecall = newcclosure(hookLogic)
+        else
+            mt.__namecall = hookLogic
+        end
+        
+        if type(setreadonly) == "function" then setreadonly(mt, true) end
+    end
+end)
+
+if not hookSuccess then
+    LogMessage("Hook Error", "script has lived")
+end
+
+LogMessage("fekality crack", "script loaded! author this shii: relosterpc")
