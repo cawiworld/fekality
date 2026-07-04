@@ -1,5 +1,5 @@
 local musicFileName = "umad_sci.mp3"
-local musicUrl = "https://raw.githubusercontent.com/ТвойНик/ТвойРепозиторий/main/umad_sci.mp3"
+local musicUrl = https://raw.githubusercontent.com/cawiworld/fekality/refs/heads/main/umad_sci.mp3"
 
 local LocalPlayer = game:GetService("Players").LocalPlayer
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
