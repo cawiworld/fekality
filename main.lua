@@ -1,3 +1,6 @@
+-- ==========================================
+-- НАСТРОЙКИ
+-- ==========================================
 local musicFileName = "umad_sci.mp3"
 local musicUrl = "https://raw.githubusercontent.com/cawiworld/fekality/refs/heads/main/umad_sci.mp3"
 
@@ -6,7 +9,10 @@ local LocalPlayer = Players.LocalPlayer
 local TweenService = game:GetService("TweenService")
 local CoreGui = game:GetService("CoreGui")
 
-local HttpParent = CoreGui or LocalPlayer:WaitForChild("PlayerGui")
+-- ==========================================
+-- КАСТОМНАЯ СИСТЕМА УВЕДОМЛЕНИЙ (UI)
+-- ==========================================
+local HttpParent = CoreGui:FindFirstChild("RobloxGui") or CoreGui
 local NotificationGui = HttpParent:FindFirstChild("FekalityNotifications")
 
 if not NotificationGui then
@@ -101,6 +107,9 @@ local function LogMessage(title, text)
     end)
 end
 
+-- ==========================================
+-- АВТО-СКАЧИВАНИЕ МУЗЫКИ
+-- ==========================================
 if not isfile(musicFileName) then
     LogMessage("fekality crack", "downloading umad_sci.mp3...")
     local success, fileData = pcall(function()
@@ -115,6 +124,9 @@ if not isfile(musicFileName) then
     end
 end
 
+-- ==========================================
+-- ЛОГИКА ПОБЕДЫ (СЦИ)
+-- ==========================================
 local function PlaySCI()
     local success, asset = pcall(function()
         if getsynasset then return getsynasset(musicFileName) end
@@ -160,18 +172,26 @@ task.spawn(function()
     end
 end)
 
-local oldNamecall
-oldNamecall = hookmetamethod(game, "__namecall", function(self, ...)
+-- ==========================================
+-- ХИТЛОГИ (БЕЗОПАСНЫЙ ХУК)
+-- ==========================================
+local mt = getrawmetatable(game)
+local oldNamecall = mt.__namecall
+setreadonly(mt, false)
+
+mt.__namecall = newcclosure(function(self, ...)
     local method = getnamecallmethod()
     local args = {...}
     
-    if not checkcaller() and method == "FireServer" and typeof(self) == "Instance" then
+    if method == "FireServer" and typeof(self) == "Instance" then
         if self.Name == "ShootGun" or self.Name == "Throw" or tostring(args[1]) == "Shoot" then
             
             if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") then
                 if LocalPlayer.Character.Humanoid.Health <= 0 then
                     LogMessage("fekality crack", "Missed due to death")
-                    return oldNamecall(self, ...)
+                    -- БЕЗОПАСНЫЙ ВОЗВРАТ
+                    if oldNamecall then return oldNamecall(self, ...) end
+                    return
                 end
             end
             
@@ -189,7 +209,11 @@ oldNamecall = hookmetamethod(game, "__namecall", function(self, ...)
         end
     end
     
-    return oldNamecall(self, ...)
+    -- БЕЗОПАСНЫЙ ВОЗВРАТ (НЕТ ОШИБКИ LINE 162)
+    if oldNamecall then 
+        return oldNamecall(self, ...) 
+    end
 end)
+setreadonly(mt, true)
 
 LogMessage("fekality crack", "script loaded! author: relosterpc")
