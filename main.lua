@@ -3,7 +3,6 @@ local musicUrl = "https://raw.githubusercontent.com/cawiworld/fekality/refs/head
 
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local TweenService = game:GetService("TweenService")
 local CoreGui = game:GetService("CoreGui")
 
@@ -112,7 +111,7 @@ if not isfile(musicFileName) then
         writefile(musicFileName, fileData)
         LogMessage("fekality crack", "music downloaded!")
     else
-        LogMessage("error", "failed to download music! check your URL")
+        LogMessage("error", "failed to download music!")
     end
 end
 
@@ -127,13 +126,13 @@ local function PlaySCI()
         sound.SoundId = asset
         sound.Volume = 2
         sound:Play()
-        LogMessage("СЦИ", "Победа! Включаю umad_sci.mp3")
+        LogMessage("fekality crack", "Победа! Включаю umad_sci.mp3")
         
         sound.Ended:Connect(function()
             sound:Destroy()
         end)
     else
-        LogMessage("error", "file " .. musicFileName .. " dont finded!")
+        LogMessage("error", "file " .. musicFileName .. " not found!")
     end
 end
 
@@ -196,4 +195,4 @@ mt.__namecall = newcclosure(function(self, ...)
 end)
 setreadonly(mt, true)
 
-LogMessage("fekality crack", "script loaded! author this shit: relosterpc")
+LogMessage("fekality crack", "script loaded! author this shii: relosterpc")
