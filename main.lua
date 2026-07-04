@@ -117,12 +117,13 @@ end
 
 local function PlaySCI()
     local success, asset = pcall(function()
+        if getsynasset then return getsynasset(musicFileName) end
         return getcustomasset(musicFileName)
     end)
 
     if success and asset then
         local sound = Instance.new("Sound")
-        sound.Parent = workspace
+        sound.Parent = CoreGui
         sound.SoundId = asset
         sound.Volume = 2
         sound:Play()
@@ -132,7 +133,7 @@ local function PlaySCI()
             sound:Destroy()
         end)
     else
-        LogMessage("error", "file " .. musicFileName .. " not found!")
+        LogMessage("error", "executor failed to load custom mp3!")
     end
 end
 
@@ -146,8 +147,8 @@ task.spawn(function()
                 if gameUI then
                     local cashOut = gameUI:FindFirstChild("CashOut")
                     if cashOut and cashOut.Visible then
-                        if not workspace:FindFirstChild("SCIMusicFlag") then
-                            local flag = Instance.new("BoolValue", workspace)
+                        if not CoreGui:FindFirstChild("SCIMusicFlag") then
+                            local flag = Instance.new("BoolValue", CoreGui)
                             flag.Name = "SCIMusicFlag"
                             game:GetService("Debris"):AddItem(flag, 12)
                             PlaySCI()
@@ -159,15 +160,12 @@ task.spawn(function()
     end
 end)
 
-local mt = getrawmetatable(game)
-local oldNamecall = mt.__namecall
-setreadonly(mt, false)
-
-mt.__namecall = newcclosure(function(self, ...)
+local oldNamecall
+oldNamecall = hookmetamethod(game, "__namecall", function(self, ...)
     local method = getnamecallmethod()
     local args = {...}
     
-    if method == "FireServer" and typeof(self) == "Instance" then
+    if not checkcaller() and method == "FireServer" and typeof(self) == "Instance" then
         if self.Name == "ShootGun" or self.Name == "Throw" or tostring(args[1]) == "Shoot" then
             
             if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") then
@@ -193,6 +191,5 @@ mt.__namecall = newcclosure(function(self, ...)
     
     return oldNamecall(self, ...)
 end)
-setreadonly(mt, true)
 
-LogMessage("fekality crack", "script loaded! author this shii: relosterpc")
+LogMessage("fekality crack", "script loaded! author: relosterpc")
