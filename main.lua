@@ -1,14 +1,30 @@
 local musicFileName = "umad_sci.mp3"
+local musicUrl = "https://raw.githubusercontent.com/ТвойНик/ТвойРепозиторий/main/umad_sci.mp3"
+
 local LocalPlayer = game:GetService("Players").LocalPlayer
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local StarterGui = game:GetService("StarterGui")
 
-local function LogMessage(title, text, color)
+local function LogMessage(title, text)
     StarterGui:SetCore("SendNotification", {
         Title = title,
         Text = text,
         Duration = 3,
     })
+end
+
+if not isfile(musicFileName) then
+    LogMessage("fekality crack", "downloading umad_sci.mp3...")
+    local success, fileData = pcall(function()
+        return game:HttpGet(musicUrl)
+    end)
+    
+    if success and fileData then
+        writefile(musicFileName, fileData)
+        LogMessage("fekality crack", "music downloaded!")
+    else
+        LogMessage("error", "failed to download music!")
+    end
 end
 
 local function PlaySCI()
@@ -22,13 +38,13 @@ local function PlaySCI()
         sound.SoundId = asset
         sound.Volume = 2
         sound:Play()
-        LogMessage("СЦИ", "Победа! Включаю umad_sci.mp3")
+        LogMessage("fekality crack", "win! you mvp btw")
         
         sound.Ended:Connect(function()
             sound:Destroy()
         end)
     else
-        LogMessage("error", "file " .. musicFileName .. " dont finded!)
+        LogMessage("error", "file " .. musicFileName .. " dont finded!")
     end
 end
 
@@ -57,7 +73,7 @@ mt.__namecall = newcclosure(function(self, ...)
     local method = getnamecallmethod()
     local args = {...}
     
-    if method == "FireServer" and tostring(self.Name) == "ShootGun" or tostring(self.Name) == "Throw" or tostring(args[1]) == "Shoot" then
+    if method == "FireServer" and (tostring(self.Name) == "ShootGun" or tostring(self.Name) == "Throw" or tostring(args[1]) == "Shoot") then
         
         if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") then
             if LocalPlayer.Character.Humanoid.Health <= 0 then
