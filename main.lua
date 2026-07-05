@@ -1,6 +1,5 @@
 local musicFileName = "umad_sci.mp3"
 local musicUrl = "https://raw.githubusercontent.com/cawiworld/fekality/refs/heads/main/umad_sci.mp3"
-
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
 local TweenService = game:GetService("TweenService")
@@ -118,7 +117,7 @@ if type(isfile) == "function" and not isfile(musicFileName) then
             LogMessage("NeverPuzo", "Music downloaded successfully!")
         end
     else
-        LogMessage("NeverPuzo", "Failed to download audio from GitHub.")
+        LogMessage("NeverPuzo", "Failed to download audio.")
     end
 end
 
@@ -165,7 +164,7 @@ AuthorText.Position = UDim2.new(0, 0, 1, -25)
 AuthorText.BackgroundTransparency = 1
 AuthorText.TextColor3 = Color3.fromRGB(70, 80, 100)
 AuthorText.TextSize = 11
-AuthorText.Font = Enum.Font.GothamItalic
+AuthorText.Font = Enum.Font.Gotham
 AuthorText.Text = "author this shii: relosterpc"
 AuthorText.Parent = Loader
 
@@ -188,13 +187,17 @@ task.spawn(function()
         InjectStatus.Text = phrases[i]
     end
 end)
+
 local loadTween = TweenService:Create(BarFill, TweenInfo.new(3.5, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Size = UDim2.new(1, 0, 1, 0)})
 loadTween:Play()
 loadTween.Completed:Wait()
 
 TweenService:Create(Loader, TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {Size = UDim2.new(0, 0, 0, 0), BackgroundTransparency = 1}):Play()
 TweenService:Create(LoaderStroke, TweenInfo.new(0.3), {Thickness = 0}):Play()
-LogoText:Destroy() InjectStatus:Destroy() AuthorText:Destroy() BarBg:Destroy()
+LogoText:Destroy()
+InjectStatus:Destroy()
+AuthorText:Destroy()
+BarBg:Destroy()
 task.wait(0.3)
 Loader:Destroy()
 
@@ -218,12 +221,20 @@ MainStroke.Parent = MainMenu
 local dragging, dragInput, dragStart, startPos
 MainMenu.InputBegan:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseButton1 then
-        dragging = true dragStart = input.Position startPos = MainMenu.Position
-        input.Changed:Connect(function() if input.UserInputState == Enum.UserInputState.End then dragging = false end end)
+        dragging = true
+        dragStart = input.Position
+        startPos = MainMenu.Position
+        input.Changed:Connect(function()
+            if input.UserInputState == Enum.UserInputState.End then
+                dragging = false
+            end
+        end)
     end
 end)
 MainMenu.InputChanged:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseBehavior then dragInput = input end
+    if input.UserInputType == Enum.UserInputType.MouseBehavior then
+        dragInput = input
+    end
 end)
 game:GetService("UserInputService").InputChanged:Connect(function(input)
     if input == dragInput and dragging then
@@ -299,7 +310,6 @@ local function CreateTabBtn(name, pageToShow)
     Btn.TextXAlignment = Enum.TextXAlignment.Left
     Btn.Text = "  " .. name
     Btn.Parent = TabsList
-
     Btn.MouseButton1Click:Connect(function()
         for _, p in pairs(Pages:GetChildren()) do p.Visible = false end
         for _, b in pairs(TabsList:GetChildren()) do if b:IsA("TextButton") then b.TextColor3 = Color3.fromRGB(120, 130, 150) end end
@@ -316,6 +326,7 @@ local function ApplyPageLayout(page)
     L.Padding = UDim.new(0, 8)
     L.Parent = page
 end
+
 ApplyPageLayout(WorldPage)
 ApplyPageLayout(DetectorPage)
 
@@ -325,11 +336,11 @@ local function CreateToggle(parent, text, configKey, callback)
     Frame.BackgroundColor3 = Color3.fromRGB(12, 17, 28)
     Frame.BorderSizePixel = 0
     Frame.Parent = parent
-
+    
     local Corner = Instance.new("UICorner")
     Corner.CornerRadius = UDim.new(0, 4)
     Corner.Parent = Frame
-
+    
     local Label = Instance.new("TextLabel")
     Label.Size = UDim2.new(1, -60, 1, 0)
     Label.Position = UDim2.new(0, 10, 0, 0)
@@ -340,7 +351,7 @@ local function CreateToggle(parent, text, configKey, callback)
     Label.TextXAlignment = Enum.TextXAlignment.Left
     Label.Text = text
     Label.Parent = Frame
-
+    
     local Box = Instance.new("TextButton")
     Box.Size = UDim2.new(0, 35, 0, 18)
     Box.Position = UDim2.new(1, -45, 0.5, -9)
@@ -348,11 +359,11 @@ local function CreateToggle(parent, text, configKey, callback)
     Box.BorderSizePixel = 0
     Box.Text = ""
     Box.Parent = Frame
-
+    
     local BoxCorner = Instance.new("UICorner")
     BoxCorner.CornerRadius = UDim.new(0, 9)
     BoxCorner.Parent = Box
-
+    
     local Dot = Instance.new("Frame")
     Dot.Size = UDim2.new(0, 12, 0, 12)
     Dot.Position = Config[configKey] and UDim2.new(1, -15, 0.5, -6) or UDim2.new(0, 3, 0.5, -6)
@@ -360,7 +371,7 @@ local function CreateToggle(parent, text, configKey, callback)
     Dot.BorderSizePixel = 0
     Dot.Parent = Box
     Instance.new("UICorner", Dot).CornerRadius = UDim.new(0, 6)
-
+    
     Box.MouseButton1Click:Connect(function()
         Config[configKey] = not Config[configKey]
         TweenService:Create(Box, TweenInfo.new(0.2), {BackgroundColor3 = Config[configKey] and Color3.fromRGB(0, 130, 255) or Color3.fromRGB(30, 38, 55)}):Play()
@@ -369,7 +380,7 @@ local function CreateToggle(parent, text, configKey, callback)
     end)
 end
 
-CreateToggle(WorldPage, "Nightmode (Темная ночь)", "Nightmode", function(val)
+CreateToggle(WorldPage, "Nightmode", "Nightmode", function(val)
     if val then
         if Config.Fullbright then Config.Fullbright = false end
         Lighting.ClockTime = 0
@@ -382,7 +393,7 @@ CreateToggle(WorldPage, "Nightmode (Темная ночь)", "Nightmode", functi
     end
 end)
 
-CreateToggle(WorldPage, "Fullbright (Без теней)", "Fullbright", function(val)
+CreateToggle(WorldPage, "Fullbright", "Fullbright", function(val)
     if val then
         if Config.Nightmode then Config.Nightmode = false end
         Lighting.ClockTime = 14
@@ -409,10 +420,10 @@ task.spawn(function()
     end
 end)
 
-CreateToggle(DetectorPage, "Log: Harmed (Попадания)", "LogHarmed")
-CreateToggle(DetectorPage, "Log: Missed due to spread (Промахи)", "LogSpread")
-CreateToggle(DetectorPage, "Log: Missed due to death (Смерть)", "LogDeath")
-CreateToggle(DetectorPage, "SCI Victory Music (Музыка победы)", "SCIMusic")
+CreateToggle(DetectorPage, "Log: Harmed", "LogHarmed")
+CreateToggle(DetectorPage, "Log: Missed due to spread", "LogSpread")
+CreateToggle(DetectorPage, "Log: Missed due to death", "LogDeath")
+CreateToggle(DetectorPage, "SCI Victory Music", "SCIMusic")
 
 game:GetService("UserInputService").InputBegan:Connect(function(input, gpe)
     if not gpe and (input.KeyCode == Enum.KeyCode.Insert or input.KeyCode == Enum.KeyCode.RightShift) then
@@ -426,14 +437,14 @@ local function PlaySCI()
         if type(getsynasset) == "function" then return getsynasset(musicFileName) end
         return getcustomasset(musicFileName)
     end)
-
+    
     if success and asset then
         local sound = Instance.new("Sound")
         sound.Parent = SoundService
         sound.SoundId = asset
         sound.Volume = 2
         sound:Play()
-        LogMessage("NeverPuzo", "Победа! Включаю umad_sci.mp3")
+        LogMessage("NeverPuzo", "Victory! Playing umad_sci.mp3")
         sound.Ended:Connect(function() sound:Destroy() end)
     end
 end
@@ -472,7 +483,6 @@ if type(original_namecall) == "function" then
         
         if not checkcaller() and method == "FireServer" and typeof(self) == "Instance" then
             if self.Name == "ShootGun" or self.Name == "Throw" or tostring(args[1]) == "Shoot" then
-                
                 if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") then
                     if LocalPlayer.Character.Humanoid.Health <= 0 then
                         if Config.LogDeath then
@@ -500,10 +510,9 @@ if type(original_namecall) == "function" then
                 end)
             end
         end
-        
         if original_namecall then return original_namecall(self, ...) end
     end)
     setreadonly(mt, true)
 end
 
-LogMessage("NeverPuzo", "script loaded! author this shii: relosterpc")
+LogMessage("NeverPuzo", "Loaded! Author: relosterpc")
